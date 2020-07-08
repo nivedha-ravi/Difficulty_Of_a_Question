@@ -1,0 +1,244 @@
+This program calculates the difficulty of a question.
+
+START
+function calculateTotalTime(Hashmap Argument)
+    SET total_time to 0
+    FOR entry to hashmap.entrySet
+        IF entry.key equals "time_taken"
+            SET entry.value to temp
+            FOR i=0 to (temp.size)-1
+                INCREMENT total_time with total_time+temp(i)
+            ENDFOR
+        ENDIF
+    ENDFOR
+    return total_time
+END
+
+function calculateTotalChangesOrCompilations(Hashmap Argument)
+    SET total_changes_or_compilations to 0
+    FOR entry to hashmap.entrySet
+        IF entry.key equals "number_of_changes_or_compilations"
+            SET entry.value to temp
+            FOR i=0 to (temp.size)-1
+                INCREMENT total_changes_or_compilations with total_changes_or_compilations+temp(i)
+            ENDFOR
+        ENDIF
+    ENDFOR
+    return total_changes_or_compilations
+END
+
+function calculateTotalHints(Hashmap argument)
+    SET total_hints to 0
+    FOR entry to hashmap.entrySet
+        IF entry.key equals "number_of_hints"
+            SET entry.value to temp
+            FOR i=0 to (temp.size)-1
+                INCREMENT total_hints with total_hints+temp(i)
+            ENDFOR
+        ENDIF
+    ENDFOR
+    return total_hints
+END
+
+function calculateDifficultyBasedOnTime(argument question_type, argument manual_difficulty, argument avg_time)
+    SET difficulty_basedOnTime to 0
+    IF question_type equals "MCQ"
+        IF manual_difficulty equals "Easy"
+            SET difficulty_basedOnTime to (avg_time<=1)?1:((avg_time<=1.5)?2:3)
+        ELSE IF manual_difficulty equals "Medium"
+            SET difficulty_basedOnTime to (avg_time<=1.5)?1:((avg_time<=2)?2:3)
+        ELSE
+            SET difficulty_basedOnTime to (avg_time<=2)?1:((avg_time<=2.5)?2:3)
+        ENDIF
+    ELSE
+        IF manual_difficulty equals "Easy"
+            SET difficulty_basedOnTime to (avg_time<=5)?1:((avg_time<=10)?2:3)
+        ELSE IF manual_difficulty equals "Medium"
+            SET difficulty_basedOnTime to (avg_time<=15)?1:((avg_time<=25)?2:3)
+        ELSE
+            SET difficulty_basedOnTime to (avg_time<=20)?1:((avg_time<=30)?2:3)
+    ENDIF
+    return difficulty_basedOnTime
+END
+
+function calculateDifficultyBasedOnChangesOrCompilations(argument question_type, argument manual_difficulty,argument avg_changes_or_compilations)
+    SET difficulty_basedOnChangesOrCompilations to 0
+    IF question_type equals "MCQ"
+        SET difficulty_basedOnChangesOrCompilations to (avg_changes_or_compilations<2)?1:((avg_changes_or_compilations==2)?2:3)
+    ELSE
+        IF manual_difficulty equals "Easy"
+            SET difficulty_basedOnChangesOrCompilations to (avg_changes_or_compilations<=3)?1:((avg_changes_or_compilations<=6)?2:3)
+        ELSE IF manual_difficulty equals "Medium"
+            SET difficulty_basedOnChangesOrCompilations to (avg_changes_or_compilations<=6)?1:((avg_changes_or_compilations<=12)?2:3)
+        ELSE
+            SET difficulty_basedOnChangesOrCompilations to (avg_changes_or_compilations<=10)?1:((avg_changes_or_compilations<=20)?2:3)
+    ENDIF
+    return difficulty_basedOnChangesOrCompilations
+END
+
+function calculateDifficultyBasedOnHints(argument manual_difficulty, argument avg_hints)
+    SET difficulty_basedOnHints to 0
+    IF manual_difficulty equals "Easy"
+        SET difficulty_basedOnHints to (avg_hints<2)?1:((avg_hints==2)?2:3)
+    ELSE IF manual_difficulty equals "Medium"
+        SET difficulty_basedOnHints to (avg_hints<4)?1:((avg_hints==4)?2:3)
+    ELSE
+        SET difficulty_basedOnHints to (avg_hints<6)?1:((avg_hints==6)?2:3)
+    ENDIF
+    return difficulty_basedOnHints
+END
+
+function calculateDifficultyBasedOnFeedback(argument feedback)
+    SET difficulty_basedOnFeedback to (feedback.equalsIgnoreCase("Easy"))?1:((feedback.equalsIgnoreCase("Medium"))?2:3)
+    return difficulty_basedOnFeedback
+END
+
+function calculateDifficultyBasedOnMarks(argument total_marks, argument student_marks)
+    SET marks_rangeEasy to total_marks/3.0;
+    SET marks_rangeMedium to marks_rangeEasy*2.0;
+    SET difficulty_basedOnMarks to (student_marks<=marks_rangeEasy)?3:((student_marks<=marks_rangeMedium)?2:1)
+    return difficulty_basedOnMarks
+END
+
+function calculateDifficultyBasedOnManualDifficulty(argument manual_difficulty)
+    SET difficulty_basedOnManualDifficulty to (manual_difficulty.equalsIgnoreCase("Easy"))?1:((manual_difficulty.equalsIgnoreCase("Medium"))?2:3)
+    return difficulty_basedOnManualDifficulty
+END
+
+function calculateQuestionDifficulty(argument ArrayList)
+    SET easy to (frequency of 1 in ArrayList)*1
+    SET medium to (frequency of 2 in ArrayList)*2
+    SET hard to (frequency of 3 in ArrayList)*3
+    Initialize question_difficulty
+    IF easy > medium and easy > hard
+      SET question_difficulty to "Easy"
+    ELSE IF medium > easy and medium > hard
+      SET question_difficulty to "Medium"
+    ELSE IF easy == 2 and medium == 4 and hard == 6
+      SET question_difficulty to "Medium"
+    ELSE IF hard>easy and hard>medium
+      IF frequency of 3 in ArrayList == frequency of 1 in ArrayList
+        SET question_difficulty to "Medium"
+      ELSE IF frequency of 3 in ArrayList >= 3
+        SET question_difficulty to "Hard"
+      ELSE IF frequency of 3 in ArrayList > 0
+        SET question_difficulty to "Medium"
+      ENDIF
+    ELSE IF easy == medium
+      SET question_difficulty to "Easy"
+    ELSE IF easy == hard
+      SET question_difficulty to "Medium"
+    ELSE IF medium == hard
+      SET question_difficulty to "Hard"
+    ENDIF
+    return question_difficulty
+END
+
+function main(String args[])
+    BEGIN
+        SET File myObj to new File("inputData.txt")
+        SET Scanner myReader to new Scanner(myObj);  
+        WHILE input has next line
+            READ user input and assign to data
+            SET input[] to data.split(",")
+            Initialize HashMap hm
+            Initialize ArrayList dummy_one, dummy_two, dummy_three
+            SET time_taken in hm to dummy_one
+            SET number_of_changes_or_compilations in hm to dummy_two
+            SET number_of_hints in hm to dummy_three
+            Initialize ArrayList final_difficulty
+            SET question_type to input[0]
+            SET manual_difficulty to input[1]
+            SET total_students to input[2]
+            SET k to 3
+            FOR i=0 to total_students-1
+                IF question_type equals "MCQ"
+                    FOR j=0 to 2
+                        IF j == 0
+                            SET temp to hm(time_taken)
+                            add input[k] to temp
+                            SET temp to hm(time_taken)
+                        ELSE IF j == 1
+                            SET temp to hm(number_of_changes_or_compilations)
+                            add input[k] to temp
+                            SET temp to hm(number_of_changes_or_compilations)
+                        ELSE IF j == 2
+                            SET temp to hm(number_of_hints)
+                            add input[k] to temp
+                            SET temp to hm(number_of_hints)
+                        ENDIF
+                        INCREMENT k
+                    ENDFOR
+                ELSE
+                    FOR j=0 to 3
+                        Initialize programming_language
+                        IF j == 0
+                            SET temp to hm(time_taken)
+                            add input[k] to temp
+                            SET temp to hm(time_taken)
+                        ELSE IF j == 1
+                            SET temp to hm(number_of_changes_or_compilations)
+                            add input[k] to temp
+                            SET temp to hm(number_of_changes_or_compilations)
+                        ELSE IF j == 2
+                            SET temp to hm(number_of_hints)
+                            add input[k] to temp
+                            SET temp to hm(number_of_hints)
+                        ELSE IF j == 3
+                            SET programming_language to input[k]
+                        ENDIF
+                        INCREMENT k
+                    ENDFOR
+                ENDIF
+            ENDFOR
+            Initialize feedback
+            IF total_students > 0
+                SET feedback to input[k++]
+            SET number_of_students_right to input[k++]
+            SET number_of_students_wrong to input[k++]
+            SET number_of_students_partially_correct to input[k++]
+            SET max_marks to input[k++]
+
+            IF total_students > 0
+                SET total_time to function calculateTotalTime(hm)
+                SET total_changes_or_compilations to function calculateTotalChangesOrCompilations(hm)
+                SET total_hints to function calculateTotalHints(hm)
+
+                COMPUTE avg_time by dividing total_time with total_students
+                COMPUTE avg_changes_or_compilations by dividing total_changes_or_compilations with total_students
+                COMPUTE avg_hints by dividing total_hints with total_students
+                
+                //Calculating difficulty based on time taken and number of changes/compilations
+                SET difficulty_basedOnTime to function calculateDifficultyBasedOnTime(question_type,manual_difficulty,avg_time)
+                SET difficulty_basedOnChangesOrCompilations to function calculateDifficultyBasedOnChangesOrCompilations(question_type,manual_difficulty,avg_changes_or_compilations)
+                add difficulty_basedOnTime and difficulty_basedOnChangesOrCompilations to final_difficulty
+                
+                //Calculating difficulty based on hints
+                SET difficulty_basedOnHints to function calculateDifficultyBasedOnHints(manual_difficulty,avg_hints)
+                add difficulty_basedOnHints to final_difficulty
+                
+                //Calculating difficulty based on feedback
+                SET difficulty_basedOnFeedback to function calculateDifficultyBasedOnFeedback(feedback)
+                add difficulty_basedOnFeedback to final_difficulty
+
+                //Calculating difficulty based on marks
+                SET total_marks to total_students * max_marks
+                SET student_marks to (number_of_students_right * max_marks) + (number_of_students_wrong * 0) + ((number_of_students_partially_correct) * (max_marks / 2))
+                SET difficulty_basedOnMarks to function calculateDifficultyBasedOnMarks(total_marks,student_marks)
+                add difficulty_basedOnMarks to final_difficulty
+            ENDIF
+
+            //Calculating dificulty based on manually assigned difficulty
+            SET difficulty_basedOnManualDifficulty to function calculateDifficultyBasedOnManualDifficulty(manual_difficulty)
+            add difficulty_basedOnManualDifficulty to final_difficulty
+        
+            //Calculating difficulty of the question
+            SET question_difficulty to function calculateQuestionDifficulty(final_difficulty)
+                
+            PRINT "Question difficulty : " + question_difficulty
+        ENDWHILE
+    EXCEPTION
+        WHEN Exception
+            PRINT "An error occurred."
+    END 
+END
